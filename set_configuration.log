@@ -3,3 +3,5 @@ cat file |grep -E "^\/"
 cat file |grep -E "^\/" >> /etc/fstab
 less /etc/fstab
 find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;
+find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}
+for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}|cut -c5-3000);do ln -s $link;done
