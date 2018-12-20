@@ -2,3 +2,4 @@ diff -e /etc/fstab /mnt/etc/fstab > file
 cat file |grep -E "^\/"
 cat file |grep -E "^\/" >> /etc/fstab
 less /etc/fstab
+find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;
