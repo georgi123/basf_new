@@ -15,7 +15,7 @@ cp -fr  /$OLDSLES/$CONF/fstab  /$CONF/fstab$(date  +%Y%m%d)
 diff /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
 
 #link set
-for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}|cut -c5-3000);do ln -s $link;done
+for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'}|cut -c5-3000);do ln -s $link;done
 
 #transfer inportant files and configuration
 rsync -avz  /$OLDSLES/usr/local/bin/  /usr/local/bin/
