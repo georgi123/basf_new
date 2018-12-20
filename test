@@ -19,11 +19,12 @@ rsync -avz  /$OLDSLES/usr/local/bin/  /usr/local/bin/
 rsync -avz  /$OLDSLES/$CONF/ssh/ /$CONF/ssh/
 rsync -avz  /$OLDSLES/$CONF/BASFfirewall.d/ /$CONF/BASFfirewall.d/
 rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh/
-cp -fr  /$OLDSLES/$CONF/sysctl.conf  /$CONF/sysctl.conf
+rsync -avz  /$OLDSLES/$CONF/auto.* /$CONF/
+cp -fr  /$OLDSLES/$CONF/sysctl.conf  /$CONF/sysctl.$(date  +%Y%m%d)
+cp -fr  /$OLDSLES/$CONF/sysctl.conf  /$CONF/sysctl.$(date  +%Y%m%d)
 cp -fr  /$OLDSLES/$CONF/resolv.conf  /$CONF/resolv.conf
-cp -fr  /$OLDSLES/$CONF/passwd  /$CONF/passwd
-cp -fr  /$OLDSLES/$CONF/shadow /$CONF/shadow
-cp -fr  /$OLDSLES/$CONF/auto.master /$CONF/auto.master
+cp -fr  /$OLDSLES/$CONF/passwd  /$CONF/passwd.$(date  +%Y%m%d)
+cp -fr  /$OLDSLES/$CONF/shadow /$CONF/shadow$(date  +%Y%m%d)
 cp -fr  /$OLDSLES/$CONF/auto.apps /$CONF/auto.apps
 cp -fr  /$OLDSLES/$CONF/nscd.conf /$CONF/nscd.conf
 #set rpcbind user
@@ -77,12 +78,12 @@ $COMMAND enable vasypd
 $COMMAND enable autofs
 
 #check
-diff /$CONF/sysctl.conf    /$OLDSLES/$CONF/sysctl.conf  >> $LOG
-diff /$CONF/resolv.conf    /$OLDSLES/$CONF/resolv.conf  >> $LOG
-diff /$CONF/passwd         /$OLDSLES/$CONF/passwd       >> $LOG
-diff /$CONF/shadow         /$OLDSLES/$CONF/shadow       >> $LOG
-diff /$CONF/services       /$OLDSLES/$CONF/services     >> $LOG
-diff /$CONF/auto.master    /$OLDSLES/$CONF/auto.master  >> $LOG
+#diff /$CONF/sysctl.conf    /$OLDSLES/$CONF/sysctl.conf  >> $LOG
+#diff /$CONF/resolv.conf    /$OLDSLES/$CONF/resolv.conf  >> $LOG
+#diff /$CONF/passwd         /$OLDSLES/$CONF/passwd       >> $LOG
+#diff /$CONF/shadow         /$OLDSLES/$CONF/shadow       >> $LOG
+#diff /$CONF/services       /$OLDSLES/$CONF/services     >> $LOG
+#diff /$CONF/auto.master    /$OLDSLES/$CONF/auto.master  >> $LOG
 #read
 echo "Check diferrences betwen fstabs and cofigure corectly\n Check autofs configuration too\n"
 read
