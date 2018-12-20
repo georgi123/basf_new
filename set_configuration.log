@@ -1,0 +1,4 @@
+diff -e /etc/fstab /mnt/etc/fstab > file
+cat file |grep -E "^\/"
+cat file |grep -E "^\/" >> /etc/fstab
+less /etc/fstab
