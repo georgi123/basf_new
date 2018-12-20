@@ -1,3 +1,4 @@
+echo "/root/scripts/boot_mount.sh system" >> /etc/rc.d/boot.local
 CONF=etc
 OLDSLES=mnt
 LOG=set_configuration.log
