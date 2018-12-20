@@ -5,9 +5,7 @@ CONF=etc
 OLDSLES=mnt
 LOG=set_configuration.log
 COMMAND=$(systemctl)
-LINK=$(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}|cut -c5-3000)
 
-#mount suse11 disk in the /mnt
 mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
 mount /dev/$1/tmp /$OLDSLES/tmp/
@@ -16,8 +14,8 @@ mount /dev/$1/home /$OLDSLES/usr2/local/
 cp -fr  /$OLDSLES/$CONF/fstab  /$CONF/fstab$(date  +%Y%m%d)
 diff /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
 
-#sim links creation
-ln -s $LINK
+#link set
+for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}|cut -c5-3000);do ln -s $link;done
 
 #transfer inportant files and configuration
 rsync -avz  /$OLDSLES/usr/local/bin/  /usr/local/bin/
