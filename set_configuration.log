@@ -1,7 +1,24 @@
-diff -e /etc/fstab /mnt/etc/fstab > file
-cat file |grep -E "^\/"
-cat file |grep -E "^\/" >> /etc/fstab
+#check fstab
+diff -e /etc/fstab /mnt/etc/fstab > fstab_dif
+cat fstab_dif |grep -E "^\/"
+cat fstab_dif |grep -E "^\/" >> /etc/fstab
 less /etc/fstab
+#check passwd
+diff -e /etc/passwd /mnt/etc/passwd > pass_dif
+cat pass_dif
+cat pass_dif |grep -E "^\/" >> /etc/passwd
+less /etc/passwd
+#check group
+diff -e /etc/group /mnt/etc/group > group_dif
+cat group_dif
+cat group_dif |grep -E "^\/" >> group_dif
+less /etc/group
+#check shadow
+diff -e /etc/shadow /mnt/etc/shadow > shadow_dif
+cat shadow_dif
+cat shadow_dif |grep -E "^\/" >> shadow_dif
+less /etc/shadow
+
 find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;
 find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}
 for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'}|cut -c5-3000);do ln -s $link;done
