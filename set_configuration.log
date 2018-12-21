@@ -36,3 +36,15 @@ sed -i "s/\/mnt//" linklist
 cat file1
 while read p; do ln -s $p;done < linklist
 find / -maxdepth 1 -xdev -type l -exec ls -l {} \;
+
+systemctl restart rpcbind.service
+systemctl status rpcbind.service
+service ypbind stop
+service vasypd stop
+service vasd stop
+/opt/quest/sbin/.vasypd -f
+service vasd start
+service vasypd start
+service ypbind start
+vastool flush
+rcautofs restart
