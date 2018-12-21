@@ -14,6 +14,11 @@ echo "GROUP"
 grep -v -f /etc/group /mnt/etc/group > group_dif
 cat group_dif
 #cat group_dif |grep -E "^\/" >> group_dif
+##check sysctl.conf
+echo "SYSCTL"
+grep -v -f /etc/sysctl.conf /mnt/etc/sysctl.conf > sysctl_dif
+cat sysctl_dif
+
 ##check shadow
 echo "SHADOW"
 grep -v -f /etc/shadow /mnt/etc/shadow > shadow_dif
