@@ -37,6 +37,15 @@ cat file1
 while read p; do ln -s $p;done < linklist
 find / -maxdepth 1 -xdev -type l -exec ls -l {} \;
 
+
+#link set
+#find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;
+#find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}
+#for link in $(find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'}|cut -c5-3000);do ln -s $link;done
+#find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'} > linklist
+#sed -i "s/\/$OLDSLES//" linklist
+#cat linklist
+
 systemctl restart rpcbind.service
 systemctl status rpcbind.service
 service ypbind stop
