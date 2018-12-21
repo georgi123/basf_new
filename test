@@ -115,12 +115,12 @@ domainname $( cat /etc/defaultdomain )
 #set hostname
 hostnamectl set-hostname $2
 #set corect services boot with OS
-$COMMAND enable rpcbind
-$COMMAND enable nscd
-$COMMAND enable ypbind
-$COMMAND enable vasd
-$COMMAND enable vasypd
-$COMMAND enable autofs
+$COMMAND enable rpcbind && $COMMAND restart rpcbind
+$COMMAND enable nscd && $COMMAND restart nscd
+$COMMAND enable ypbind && $COMMAND restart ypbind
+$COMMAND enable vasd && $COMMAND restart vasd
+$COMMAND enable vasypd && $COMMAND restart vasypd
+$COMMAND enable autofs && $COMMAND restart autofs
 
 
 
