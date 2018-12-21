@@ -16,7 +16,9 @@ cat group_dif
 #cat group_dif |grep -E "^\/" >> group_dif
 ##check sysctl.conf
 echo "SYSCTL"
-grep -v -f /etc/sysctl.conf /mnt/etc/sysctl.conf > sysctl_dif
+greo -v \# /etc/sysctl.conf >> sles12.sys
+greo -v \# /mnt/etc/sysctl.conf >> sles1.sys
+grep -v -f sles12.sys sles1.sys > sysctl_dif
 cat sysctl_dif
 
 ##check shadow
