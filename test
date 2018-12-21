@@ -4,7 +4,7 @@
 CONF=etc
 OLDSLES=mnt
 LOG=set_configuration.log
-COMMAND=$(systemctl)
+COMMAND=systemctl
 
 mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
