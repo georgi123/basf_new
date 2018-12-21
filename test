@@ -10,6 +10,44 @@ mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
 mount /dev/$1/tmp /$OLDSLES/tmp/
 mount /dev/$1/home /$OLDSLES/usr2/local/
+##check fstab
+echo "FSTAB"
+grep -v -f /etc/fstab /mnt/etc/fstab > fstab_dif
+cat fstab_dif 
+#cat fstab_dif |grep -E "^\/" >> /etc/fstab
+#less fstab_dif
+##check passwd
+echo "PASSWD"
+grep -v -f /etc/passwd /mnt/etc/passwd > pass_dif
+cat pass_dif
+#cat pass_dif |grep -E "^\/" >> /etc/passwd
+##check group
+echo "GROUP"
+grep -v -f /etc/group /mnt/etc/group > group_dif
+cat group_dif
+#cat group_dif |grep -E "^\/" >> group_dif
+##check sysctl.conf
+echo "SYSCTL"
+greo -v \# /etc/sysctl.conf >> sles12.sys
+greo -v \# /mnt/etc/sysctl.conf >> sles1.sys
+grep -v -f sles12.sys sles1.sys > sysctl_dif
+cat sysctl_dif
+
+##check shadow
+echo "SHADOW"
+grep -v -f /etc/shadow /mnt/etc/shadow > shadow_dif
+cat shadow_dif
+#cat shadow_dif |grep -E "^\/" >> shadow_dif
+
+##links set and check
+find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;
+find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}
+for link in $(find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'}|cut -c5-3000);do ln -s $link;done
+find /mnt -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $11 "\t"  $9'} > linklist
+sed -i "s/\/mnt//" linklist
+cat file1
+while read p; do ln -s $p;done < linklist
+find / -maxdepth 1 -xdev -type l -exec ls -l {} \;
 #fstab sincronisation
 cp -fr  /$OLDSLES/$CONF/fstab  /$CONF/fstab$(date  +%Y%m%d)
 diff /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
@@ -84,20 +122,5 @@ $COMMAND enable vasd
 $COMMAND enable vasypd
 $COMMAND enable autofs
 
-#check
-#diff /$CONF/sysctl.conf    /$OLDSLES/$CONF/sysctl.conf  >> $LOG
-#diff /$CONF/resolv.conf    /$OLDSLES/$CONF/resolv.conf  >> $LOG
-#diff /$CONF/passwd         /$OLDSLES/$CONF/passwd       >> $LOG
-#diff /$CONF/shadow         /$OLDSLES/$CONF/shadow       >> $LOG
-#diff /$CONF/services       /$OLDSLES/$CONF/services     >> $LOG
-#diff /$CONF/auto.master    /$OLDSLES/$CONF/auto.master  >> $LOG
-#read
-echo "Check diferrences betwen fstabs and cofigure corectly\n Check autofs configuration too\n"
-read
 
-if [ -s $LOG ]
- then
-   cat $LOG
-  else
- reboot
-fi
+
