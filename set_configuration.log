@@ -1,20 +1,20 @@
 #check fstab
-diff -d /etc/fstab /mnt/etc/fstab > fstab_dif
+grep -v -f /etc/fstab /mnt/etc/fstab > fstab_dif
 cat fstab_dif |grep -E "^\/"
 cat fstab_dif |grep -E "^\/" >> /etc/fstab
 less /etc/fstab
 #check passwd
-diff -d /etc/passwd /mnt/etc/passwd > pass_dif
+grep -v -f /etc/passwd /mnt/etc/passwd > pass_dif
 cat pass_dif
 cat pass_dif |grep -E "^\/" >> /etc/passwd
 less /etc/passwd
 #check group
-diff -d /etc/group /mnt/etc/group > group_dif
+grep -v -f /etc/group /mnt/etc/group > group_dif
 cat group_dif
 cat group_dif |grep -E "^\/" >> group_dif
 less /etc/group
 #check shadow
-diff -d /etc/shadow /mnt/etc/shadow > shadow_dif
+grep -v -f /etc/shadow /mnt/etc/shadow > shadow_dif
 cat shadow_dif
 cat shadow_dif |grep -E "^\/" >> shadow_dif
 less /etc/shadow
