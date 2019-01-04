@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#echo "destination dst_net_t514 { tcp(security.bcs.de port(514) ); };" >> /etc/syslog-ng/syslog-ng.conf
+#echo "log { source(src); destination(dst_net_t514); };" >>  /etc/syslog-ng/syslog-ng.con
+if [ -f /etc/syslog-ng/syslog-ng.conf ]
+then
+ sed -i "s/destination logserver { udp("10.195.145.42" port(514)); };/destination dst_net_t514 { tcp(security.bcs.de port(514) ); };/"   /etc/syslog-ng/syslog-ng.conf
+ sed -i "s/log { source(src); destination(logserver); };/log { source(src); destination(dst_net_t514); };/"   /etc/syslog-ng/syslog-ng.conf
+elif [ -f /etc/rsyslog.d/remote.conf ]
+then
+ sed -i "s/#*.* @@remote-host/*.*     @@security.bcs.de:514/" /etc/rsyslog.d/remote.conf
+elce 
+ echo "BOTH FILES ARE MISSING."
+fi
