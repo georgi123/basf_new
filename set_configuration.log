@@ -98,7 +98,7 @@ if [ -f /$OLDSLES/etc/oratab ]
  else
    echo "There is not oracle DB installed"
 fi
-#only for HANA
+##only for HANA
 if [ -d /mnt/var/lib/hdb/ ]
  then
    rsync -av /$OLDSLES/var/lib/hdb/ /var/lib/hdb
@@ -106,7 +106,7 @@ if [ -d /mnt/var/lib/hdb/ ]
    echo "there is not hana running"
 fi  
 
-#setup network
+##setup network
 for p in {0..1}
 do
 if [ -f /etc/sysconfig/network/ifcfg-eth$p ]
@@ -118,12 +118,12 @@ if [ -f /etc/sysconfig/network/ifcfg-eth$p ]
     echo "names are difrent"
  fi
 done
-#local host set
+##local host set
 echo 'ypserver localhost' > /etc/yp.conf
 echo 'basfad.basf.net' > /etc/defaultdomain
 domainname $( cat /etc/defaultdomain )
 
-#set hostname
+##set hostname
 hostnamectl set-hostname $2
 #set corect services boot with OS
 systemctl enable rpcbind && systemctl restart rpcbind
