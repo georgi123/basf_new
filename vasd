@@ -1,0 +1,528 @@
+function qc_introduce()
+{
+	echo
+	echo "BASF Quality Checks Helper."
+	echo "Developed by Stoyan Gramatikov, ES EMEA ITO Delivery, Sofia, Bulgaria"
+	echo "Version 5.0"
+
+	return 0
+}
+
+function qc_zinternal_show_functions()
+{
+	declare -f qc_introduce
+	declare -f qc_zinternal_show_functions
+	declare -f qc_zinternal_check_script_hosting_server
+	declare -f qc_zinternal_get_os_version
+	declare -f qc_zinternal_set_yp_services_common_systemd
+	declare -f qc_zinternal_set_yp_services_sles12
+	declare -f qc_zinternal_set_yp_services_rh7
+	declare -f qc_zinternal_set_yp_services_by_os
+	declare -f qc_set_server_yp_services
+	declare -f qc_check_server_ulm_map
+	declare -f qc_zinternal_run_netcat
+	declare -f qc_zinternal_check_server_nfs_connection
+	declare -f qc_check_server_nfs_connection_uranus
+	declare -f qc_check_server_nfs_connection_orainst
+	declare -f qc_check_server_nfs_connections
+	declare -f qc_add_server_to_pass
+	declare -f qc_join_server_to_ad
+	declare -f qc_join_server_to_suse_manager
+	declare -f qc_generate_ulm_maps
+
+	return ${?}
+}
+
+function qc_zinternal_check_script_hosting_server()
+{
+	\hostname | awk -F '.' '{ print $1 }' | grep -iq '^platinum2$'
+
+	return ${?}
+}
+
+function qc_zinternal_get_os_version()
+{
+	cat /etc/*release |
+	{
+		local read_line=
+		local os_type=''
+		local os_version=''
+
+		while read read_line
+		do
+			[ "${os_type}x" = "x" ] && os_type=$( echo ${read_line} | sed 's/'\''//g' | sed 's/'\"'//g' | sed 's/\s//g' | grep -i '^name=' | awk -F '=' '{ print $2 }' )
+			[ "${os_version}x" = "x" ] && os_version=$( echo ${read_line} | sed 's/'\''//g' | sed 's/'\"'//g' | sed 's/\s//g' | grep -i '^version=' | awk -F '=' '{ print $2 }' )
+		done
+
+		echo ${os_type}'#'${os_version} | awk '{ print toupper( $0 ) }'
+	}
+
+	return ${?}
+}
+
+function qc_zinternal_set_yp_services_common_systemd()
+{
+	echo 'ypserver localhost' > /etc/yp.conf
+
+	echo --- Enable services
+	systemctl enable ypbind
+	systemctl enable vasd
+	systemctl enable vasypd
+	systemctl enable autofs
+
+	echo --- Stop services
+	systemctl stop ypbind
+	systemctl stop vasd
+	systemctl stop vasypd
+	systemctl stop autofs
+
+	echo --- Start services
+	systemctl start vasd
+	systemctl start vasypd
+	systemctl start ypbind
+	systemctl start autofs
+
+	echo --- Restart services
+	systemctl restart ypbind
+	systemctl restart vasd
+	systemctl restart vasypd
+	systemctl restart autofs
+
+	echo --- Services status
+	systemctl status ypbind
+	systemctl status vasd
+	systemctl status vasypd
+	systemctl status autofs
+
+	vastool configure pam
+
+	return ${?}
+}
+
+function qc_zinternal_set_yp_services_sles12()
+{
+	echo 'basfad.basf.net' > /etc/defaultdomain
+	domainname $( cat /etc/defaultdomain )
+
+	qc_zinternal_set_yp_services_common_systemd
+
+	return ${?}
+}
+
+function qc_zinternal_set_yp_services_rh7()
+{
+	if cat /etc/sysconfig/network | sed 's/#.*//g' | grep -iq 'NISDOMAIN\s*=\s*'
+	then
+		echo 'Editing /etc/sysconfig/network !'
+		sed -i 's/NISDOMAIN\s*=\s*.*/NISDOMAIN=BASFAD.BASF.NET/gI' /etc/sysconfig/network
+	else
+		echo 'Adding NISDOMAIN to /etc/sysconfig/network !'
+		echo 'NISDOMAIN=BASFAD.BASF.NET' >> /etc/sysconfig/network
+	fi
+		
+	ypdomainname BASFAD.BASF.NET
+
+	qc_zinternal_set_yp_services_common_systemd
+
+	return ${?}
+}
+
+function qc_zinternal_set_yp_services_by_os()
+{
+	local os_id=$( qc_zinternal_get_os_version )
+
+	echo $( hostname )' # OS ID - |'${os_id}'|'
+
+	if echo ${os_id} | grep -q 'SLES#12'
+	then
+		qc_zinternal_set_yp_services_sles12
+	elif echo ${os_id} | grep -q 'REDHATENTERPRISELINUXSERVER#7'
+	then
+		qc_zinternal_set_yp_services_rh7
+	else
+		echo "### Not supported version - "${os_id}
+		return 1
+	fi
+
+	return ${?}
+}
+
+function qc_set_server_yp_services()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_set_server_yp_services servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local x=
+
+	for x in ${*}
+	do
+		echo '### Approaching to host : '${x}
+		{
+			qc_zinternal_show_functions
+			echo qc_zinternal_set_yp_services_by_os
+			echo 'vgptool apply ; vgptool apply'
+		} | ssh -T ${x} /bin/bash
+	done
+ 
+	return ${?}
+}
+
+function qc_check_server_ulm_map()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_check_server_ulm_map servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local retv=0
+	local x=
+
+	for x in ${*}
+	do
+		echo -n ${x}' : '
+
+		if \ssh ulm03 '\cat /opt/ulm/var/c000d01/src/*' 2>/dev/null | awk '{ print $1 }' | grep -iq '^H-'$( echo ${x} | awk -F '.' '{ print $1 }' )'$'
+		then
+			retv=0
+			echo 'ULM map defined.'
+		else
+			retv=${?}
+			echo 'ULM map is missing.'
+		fi
+	done
+ 
+	return ${retv}
+}
+
+function qc_zinternal_run_netcat()
+{
+	if [ ${#} -ne 1 ]
+	then
+		echo "Usage : qc_zinternal_run_netcat nfs_server_name" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local nfs_server=${1}
+	local timeout_seconds=2
+	local cmd_nc=
+
+	if which nc &>/dev/null
+	then
+		cmd_nc=nc
+	elif which netcat &>/dev/null
+	then
+		cmd_nc=netcat
+	else
+		echo 'ERROR : Command "nc/netcat" is not available !' 1>&2
+		return 126
+	fi
+
+	echo -n $( hostname )' : '
+
+	if ! eval '${cmd_nc} -z -w "${timeout_seconds}" "${nfs_server}" 111 && "${cmd_nc}" -z -w "${timeout_seconds}" "${nfs_server}" 2049'
+	then
+		echo 'NFS ports connectivity problem !'
+		return 1
+	fi
+
+	echo 'NFS ports open.'
+
+	return 0
+}
+
+function qc_zinternal_check_server_nfs_connection()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ] || [ ${#} -eq 1 ]
+	then
+		echo "Usage : qc_zinternal_check_server_nfs_connection nfs_server_name servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local nfs_server=${1}
+	shift 1
+
+	echo '*** Checking NFS Server : '${nfs_server}
+
+	local retv=0
+	local x=
+
+	for x in ${*}
+	do
+		{
+			qc_zinternal_show_functions
+			echo qc_zinternal_run_netcat "${nfs_server}"
+		} | ssh -T ${x} /bin/bash
+
+		if [ ${?} -ne 0 ]
+		then
+			echo "ERROR : Failed to check server : "${x} 1>&2
+			retv=${?}
+		fi
+	done
+ 
+	return ${retv}
+}
+
+function qc_check_server_nfs_connection_uranus()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_check_server_nfs_connection_uranus servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	qc_zinternal_check_server_nfs_connection naSVM120.dc.basf.net ${*}
+ 
+	return ${?}
+}
+
+function qc_check_server_nfs_connection_orainst()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_check_server_nfs_connection_uranus servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	qc_zinternal_check_server_nfs_connection lxNFS03.rz-c007-j650.basf-ag.de ${*}
+ 
+	return ${?}
+}
+
+function qc_check_server_nfs_connections()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_check_server_nfs_connections servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	echo '### Checking /uranus'
+	qc_check_server_nfs_connection_uranus ${*}
+
+	echo '### Checking /orainst'
+	qc_check_server_nfs_connection_orainst ${*}
+ 
+	return ${?}
+}
+
+function qc_add_server_to_pass()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_add_server_to_pass servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local x=
+
+	for x in ${*}
+	do
+		echo '### Adding host : '${x}' to PASS.'
+
+		if ssh ${x} '/bin/bash -c "[ -e ~/.ssh/authorized_keys ] && cat  ~/.ssh/authorized_keys"' | grep -iq suse-mgr01
+		then
+			echo "suse-mgr01 public key is already added to ~/.ssh/authorized_keys on host "${x}
+		else
+			echo -n "Adding suse-mgr01 public key to ~/.ssh/authorized_keys on host "${x}" ... "
+
+			if ssh suse-mgr01 '/bin/bash -c "cat ~/.ssh/id_rsa.pub"' | ssh ${x} '/bin/bash -c "cat >> ~/.ssh/authorized_keys"'
+			then
+				echo "done."
+			else
+				echo
+				echo "Operation failed."
+				continue
+			fi
+		fi
+
+		{
+			echo "cd /infra/all/cyberarc_PASS"
+			echo "/infra/all/cyberarc_PASS/admin_server2PASS.sh --server "${x}" --add --linux"
+		} | ssh -T suse-mgr01 /bin/bash
+	done
+ 
+	return ${?}
+}
+
+function qc_join_server_to_ad()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_join_server_to_ad servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local x=
+	local i=
+
+	for x in ${*}
+	do
+		echo '### Joining host : '${x}' to AD.'
+
+		if ! ssh ${x} '/bin/bash -c "[ -x /opt/quest/bin/vastool ]"'
+		then
+			echo "### vasd not installed. Going to install it."
+
+			for i in vasclnt.rpm vasgp.rpm vasyp.rpm
+			do
+				scp -p /root/skg/rpms/vasd/${i} ${x}:/tmp/.
+				ssh ${x} '/bin/bash -c "rpm -i /tmp/"'${i}
+				ssh ${x} '/bin/bash -c "rm -f /tmp/"'${i}
+			done
+		else
+			echo "### vasd has already been installed."
+		fi
+
+		qc_set_server_yp_services ${x}
+
+		if ! cd ~/ledwind/basfad
+		then
+			echo 'ERROR : Cannot change directory to ~/ledwind/basfad !' 1>&2
+			continue
+		fi
+
+		{
+			echo 'cd scripts/'
+			echo './basfad_join2AD.sh'
+		} | ./push ${x}
+
+		cd -
+	done
+ 
+	return ${?}
+}
+
+function qc_join_server_to_suse_manager()
+{
+	if ! qc_zinternal_check_script_hosting_server
+	then
+		echo 'Please, run that function from platinum2 !'
+		qc_introduce
+		return 100
+	fi
+
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_join_server_to_suse_manager servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local x=
+
+	for x in ${*}
+	do
+		echo '### Joining host : '${x}' to SuSE Manager.'
+		ssh suse-mgr01 '/bin/bash -c "cd /infra/linux/SUSE-Manager ; ./register-to-suse-mgr01.sh -s "'"${x}"
+	done
+ 
+	return ${?}
+}
+
+function qc_generate_ulm_maps()
+{
+	if [ ${#} -eq 0 ]
+	then
+		echo "Usage : qc_generate_ulm_maps servername1 [ servername2 [ servername3 ] ... ]" 1>&2
+		qc_introduce
+		return 1
+	fi
+
+	local x=
+
+	echo
+
+	for x in ${*}
+	do
+		echo 'H-'$( echo ${x} | awk -F '.' '{ print $1 }' )' ('$( host ${x} | grep 'has' | grep 'address' | awk '{ print $1 }' )',-,)'
+	done
+
+	echo
+
+	for x in ${*}
+	do
+		echo 'U-'$( echo ${x} | awk -F '.' '{ print $1 }' )' Ugrp-Basis1'
+	done
+
+	echo
+ 
+	return ${?}
+}
+
+######################################
+# check-server lin8141765 | grep 'FAILURE: 608 Pam <sssd-shadowutils><auth> not configured for QAS.' -> vastool configure pam
+# Oracle packages SuSE : zypper -n in bc binutils gcc-c++-32bit gcc-c++-4.8 gcc48-c++ gcc-32bit gcc-4.8 gcc-info-4.8 gcc-locale-4.8 gcc48-32bit gcc48 gcc48-info gcc48-locale glibc glibc-devel libaio-devel libaio1 libaio1-32bit libgfortran3 libX11-6 libX11-6-32bit libXau6 libXau6-32bit libXtst6 libXtst6-32bit libcap-ng-utils libcap-ng0 libcap-ng0-32bit libcap-progs libcap1 libcap1-32bit libcap2 libcap2-32bit libgcc_s1-32bit libgcc_s1 libpcap1 libstdc++6-32bit libstdc++6 make mksh smartmontools sysstat xdpyinfo xorg-x11-libs
+######################################
+
+yyyprefix='qc_' ; for xxx in $( cat x | grep '^\s*function' | awk '{ print $2 }' | grep '^'${yyyprefix} ); do echo declare -f ${xxx%()}; done ; unset xxx; unset yyyprefix
+rm -f x
