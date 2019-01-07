@@ -42,14 +42,6 @@ grep -v \#/$OLDSLES/$CONF/sysctl.conf >> sles11.sys
 
 read
 
-##modify shadow file
-#echo "SHADOW"
-#grep -v -f /$CONF/shadow /$OLDSLES/$CONF/shadow > shadow_dif
-#cat shadow_dif
-#cp -fr /$CONF/shadow /$CONF/shadow$(date  +%Y%m%d)
-#echo "#users from sles11" >> /$CONF/shadow
-#cat pass_dif >> /$CONF/shadow
-
 ##links set and check
 find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;
 find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;|awk {'print $9 "\t"  $11'}
