@@ -6,6 +6,7 @@ OLDSLES=mnt
 LOG=set_configuration.log
 COMMAND=systemctl
 
+##set mountpoint from old sles11 server
 mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
 mount /dev/$1/tmp /$OLDSLES/tmp/
@@ -15,12 +16,11 @@ mount /dev/$1/home /$OLDSLES/usr2/local/
 echo "FSTAB"
 grep -v -f /$CONF/fstab /$OLDSLES/$CONF/fstab > fstab_dif
 cat fstab_dif 
-read
+
 ##modify passwd file
 echo "PASSWD"
 grep -v -f /$CONF/passwd /$OLDSLES/$CONF/passwd > pass_dif
 cat pass_dif
-read
 cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
 echo "#users from sles11" >> /$CONF/passwd
 cat pass_dif >> /$CONF/passwd
@@ -30,17 +30,16 @@ echo "GROUP"
 cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
 grep -v -f /$CONF/group /$OLDSLES/$CONF/group > group_dif
 cat group_dif
-read
 echo "#groups from sles11" >> /$CONF/group
 cat group_dif >> /$CONF/group
 
 ##check sysctl.conf
 echo "SYSCTL"
-grep -v \# /$CONF/sysctl.conf >> sles12.sys
-grep -v \#/$OLDSLES/$CONF/sysctl.conf >> sles11.sys
+grep -v \# /$CONF/sysctl.conf >> /$CONF/sles12.sys
+grep -v \# /$OLDSLES/$CONF/sysctl.conf >> /$CONF/sles11.sys
 
 
-read
+
 
 ##links set and check
 find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;
@@ -65,6 +64,7 @@ rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh/
 rsync -avz  /$OLDSLES/$CONF/auto.* /$CONF/
 cp -fr  /$OLDSLES/$CONF/resolv.conf  /$CONF/resolv.conf
 cp -fr  /$OLDSLES/$CONF/nscd.conf /$CONF/nscd.conf
+
 ##set rpcbind user
 echo "rpc:x:495:65534:user for rpcbind:/var/lib/empty:/sbin/nologin" >> /$CONF/passwd
 echo "root:sles11to12" |chpasswd
