@@ -1,0 +1,102 @@
+vg_name_change.sh >> rename vg from system to sles 11 
+sles12_sap_ora_conf.sh >> replace important configuration and check
+
+1.Change system volume group from system to suse11  
+./vg_name_change.sh system sles11
+
+
+2.Unregister server from suse-manager.
+From suse-mgr01 execute ./register-to-SUSE-Manager.sh -e -s servername
+./register-to-SUSE-Manager.sh -e -l sles11to12
+delete server via suse-manager web interface
+delete HPSA agent
+/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force
+
+
+
+3.Unjoined server from BASF domain.
+lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -u servername 
+c2gSj3+bFL
+for s in $(cat /usr2/local/sles11o12); do ./basfad_join2AD.sh -u $s;done
+group is infra-ITIS
+
+4.Stop server detach root vmdk from first iscs controller, attach root disk with sles12 vmdk on the iscso0:0.
+Attach sles11 vmdk on the last iscs controller and power on the server.
+
+5.After the server power on log in via console and execute  ./sles12_sap_ora_conf.sh sles11.
+The script will mount root file system(sles11) in /mnt directory and after that action will replace important configuration files.
+
+6.Register server to suse-manger and join server to BASF domain.
+rm  -f /etc/machine-id
+dbus-uuidgen --ensure=/etc/machine-id
+./register-to-SUSE-Manager.sh -r -l sles11to12
+lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -r servername
+$OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
+cd /tmp  
+wget http://repo-linux.wa.basf-it-services.com/noarch/DXC-Tools/opsware-agent-60.0.73283.4-linux-SLES-11-X86_64 
+chmod +x opsware* 
+./opsware* --opsw_gw_addr 10.92.96.41:3001,10.92.96.42:3001 --force_full_hw_reg --force_sw_reg
+
+7.SAP and Oracle colleagues will install new DB and application versions and check if application, databases running correct. 
+
+Scripts vg_name_change.sh, sles12_sap_ora_conf.sh, I test them on my lab but we can check if they work correct next week.
+
+
+
+[?12/?18/?2018 3:19 PM] Kostadinov, Hristo: 
+systemctl status rpcbind
+systemctl status ypbind
+	systemctl status vasd
+	systemctl status vasypd
+	systemctl status autofs 
+ei tva e reda na startirane
+
+echo 'ypserver localhost' > /etc/yp.conf
+echo 'basfad.basf.net' > /etc/defaultdomain
+domainname $( cat /etc/defaultdomain )
+
+
+
+
+How to hpsa agent work?
+
+#remove HPSA agent script
+/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force
+rm -r /opt/opsware
+$OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
+
+
+Scripts that will be needed to sles11 to sles 12 migration
+
+
+vg_name_change.sh
+basfad_join2AD.sh
+$OPSPACKAGE - hpsa agent elf package
+sles12_sap_ora_conf.sh
+
+Directory where the scripts putted  ~/sles_migration/ it a part from dimetrge home directory.
+
+
+Hello Georgi,
+ 
+here the deregister / register for APX
+ 
+Deregister:
+ 
+The deregister can be run on the suse-mgr01 (Works from every server)
+Just replace <SERVER> with the server name.
+ 
+/opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
+/opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
+ 
+Register:
+copy /opt/apxpccp/recreate_pccp_pks.sh and /opt/apxpccc/recreate_pccc_pks.sh to the server
+ 
+scp /opt/apxpccp/recreate_pccp_pks.sh <SERVER>:/opt/apxpccp/recreate_pccp_pks.sh
+scp /opt/apxpccc/recreate_pccc_pks.sh <SERVER>:/opt/apxpccc/recreate_pccc_pks.sh
+ 
+and run it on <SERVER>
+ 
+/opt/apxpccc/recreate_pccc_pks.sh
+/opt/apxpccp/recreate_pccp_pks.sh
+
