@@ -37,9 +37,9 @@ cat group_dif >> /$CONF/group
 ##check sysctl.conf
 echo "SYSCTL"
 grep -v \# /$CONF/sysctl.conf >> sles12.sys
-grep -v \# /$OLDSLES/$CONF/sysctl.conf >> sles1.sys
-grep -v -f sles12.sys sles1.sys > sysctl_dif
-cat sysctl_dif
+grep -v \#/$OLDSLES/$CONF/sysctl.conf >> sles11.sys
+
+
 read
 
 ##modify shadow file
