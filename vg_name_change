@@ -1,5 +1,5 @@
 #!/bin/bash
-#created by Georgi Dimitrov
+
 
 echo "$1 is a old vg name"
 echo "$2 is a new vg name"
