@@ -91,9 +91,9 @@ if [ -f /$OLDSLES/etc/oratab ]
    cp -fr  /$OLDSLES/etc/oratab /etc/oratab
    if  [ -f /$OLDSLES/etc/orainst.loc ]
   then
-    cp -fr  /$OLDSLES/etc/orainst.loc /etc/orainst.loc
+    cp -fr  /$OLDSLES/etc/oraInst.loc /etc/oraInst.loc
   else
-    echo "there is not orainst.loc"
+    echo "there is not oraInst.loc"
   fi
  else
    echo "There is not oracle DB installed"
