@@ -20,6 +20,9 @@ grep -i xfs /$OLDSLES/$CONF/fstab >> OLD_FS
 echo "#data and app mountpointd" >> /$CONF/fstab
 grep -vf  NEW_FS OLD_FS >> /$CONF/fstab
 rm -f NEW_FS OLD_FS
+cat /$CONF/fstab
+
+read
  
 
 ##modify passwd file
