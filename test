@@ -17,7 +17,7 @@ echo "FSTAB"
 cp /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
 grep -i xfs /$CONF/fstab |grep -v sles12 >> NEW_FS
 grep -i xfs /$OLDSLES/$CONF/fstab >> OLD_FS
-echo "#data and app mountpointd" >> /$CONF/fstab
+echo "#data and app from sles11" >> /$CONF/fstab
 grep -vf  NEW_FS OLD_FS >> /$CONF/fstab
 rm -f NEW_FS OLD_FS
 cat /$CONF/fstab
