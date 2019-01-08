@@ -6,6 +6,7 @@ OLDSLES=mnt
 LOG=set_configuration.log
 COMMAND=systemctl
 
+##set mountpoint from old sles11 server
 mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
 mount /dev/$1/tmp /$OLDSLES/tmp/
@@ -13,42 +14,36 @@ mount /dev/$1/home /$OLDSLES/usr2/local/
 
 ##check fstab
 echo "FSTAB"
-grep -v -f /$CONF/fstab /$OLDSLES/$CONF/fstab > fstab_dif
-cat fstab_dif 
-read
+grep -i xfs /$CONF/fstab |grep -v sles12 >> NEW_FS
+grep -i xfs /$OLDSLES/$CONF/fstab >> OLD_FS
+echo "data and app mountpointd" >> /$CONF/fstab
+grep -vf  NEW_FS OLD_FS >> /$CONF/fstab
+rm -f NEW_FS OLD_FS
+ 
+
 ##modify passwd file
 echo "PASSWD"
 grep -v -f /$CONF/passwd /$OLDSLES/$CONF/passwd > pass_dif
 cat pass_dif
-read
-cp /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
-echo "#users from sles11" >> /$CONF/passwd
-cat pass_dif >> /$CONF/passwd
+cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
+#echo "#users from sles11" >> /$CONF/passwd #??
+#cat pass_dif >> /$CONF/passwd #??
 
 ##modify group file
 echo "GROUP"
-cp /$CONF/group /$CONF/group$(date  +%Y%m%d)
+cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
 grep -v -f /$CONF/group /$OLDSLES/$CONF/group > group_dif
 cat group_dif
-read
-echo "#groups from sles11" >> /$CONF/group
-cat group_dif >> /$CONF/group
+#echo "#groups from sles11" >> /$CONF/group #??
+#cat group_dif >> /$CONF/group #??
 
 ##check sysctl.conf
 echo "SYSCTL"
-grep -v \# /$CONF/sysctl.conf >> sles12.sys
-grep -v \# /$OLDSLES/$CONF/sysctl.conf >> sles1.sys
-grep -v -f sles12.sys sles1.sys > sysctl_dif
-cat sysctl_dif
-read
+grep -v \# /$CONF/sysctl.conf >> /$CONF/sles12.sys
+grep -v \# /$OLDSLES/$CONF/sysctl.conf >> /$CONF/sles11.sys
 
-##modify shadow file
-#echo "SHADOW"
-#grep -v -f /$CONF/shadow /$OLDSLES/$CONF/shadow > shadow_dif
-#cat shadow_dif
-#cp /$CONF/shadow /$CONF/shadow$(date  +%Y%m%d)
-#echo "#users from sles11" >> /$CONF/shadow
-#cat pass_dif >> /$CONF/shadow
+
+
 
 ##links set and check
 find /$OLDSLES -maxdepth 1 -xdev -type l -exec ls -l {} \;
@@ -73,6 +68,7 @@ rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh/
 rsync -avz  /$OLDSLES/$CONF/auto.* /$CONF/
 cp -fr  /$OLDSLES/$CONF/resolv.conf  /$CONF/resolv.conf
 cp -fr  /$OLDSLES/$CONF/nscd.conf /$CONF/nscd.conf
+
 ##set rpcbind user
 echo "rpc:x:495:65534:user for rpcbind:/var/lib/empty:/sbin/nologin" >> /$CONF/passwd
 echo "root:sles11to12" |chpasswd
@@ -80,9 +76,11 @@ echo "root:sles11to12" |chpasswd
 #cp -fr  /$OLDSLES/$CONF/services /$CONF/services
 
 rsync -avz  /$OLDSLES/root/scripts/ /root/scripts/
-rsync -avz  /$OLDSLES/opt/special/ /opt/special/ && ln -s /opt/special /special
+rsync -avz  /$OLDSLES/opt/special/ /opt/special/
 
-#check if oracles DB is installed and running
+
+
+##check if oracles DB is installed and running
 
 if [ -f /$OLDSLES/etc/oratab ]
  then
@@ -96,8 +94,15 @@ if [ -f /$OLDSLES/etc/oratab ]
  else
    echo "There is not oracle DB installed"
 fi
+##only for HANA
+if [ -d /mnt/var/lib/hdb/ ]
+ then
+   rsync -av /$OLDSLES/var/lib/hdb/ /var/lib/hdb
+ else 
+   echo "there is not hana running"
+fi  
 
-#setup network
+##setup network
 for p in {0..1}
 do
 if [ -f /etc/sysconfig/network/ifcfg-eth$p ]
@@ -109,17 +114,19 @@ if [ -f /etc/sysconfig/network/ifcfg-eth$p ]
     echo "names are difrent"
  fi
 done
-#local host set
+##local host set
 echo 'ypserver localhost' > /etc/yp.conf
 echo 'basfad.basf.net' > /etc/defaultdomain
 domainname $( cat /etc/defaultdomain )
 
-#set hostname
+##set hostname
 hostnamectl set-hostname $2
-#set corect services boot with OS
+
+##set corect services boot with OS
 systemctl enable rpcbind && systemctl restart rpcbind
 systemctl enable nscd && systemctl restart nscd
 systemctl enable ypbind && systemctl restart ypbind
 systemctl enable vasd && systemctl restart vasd
 systemctl enable vasypd && systemctl restart vasypd
 systemctl enable autofs && systemctl restart autofs
+##check nfs mount points 
