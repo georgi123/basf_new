@@ -20,10 +20,10 @@ grep -i xfs /$OLDSLES/$CONF/fstab >> OLD_FS
 echo "#data and app from sles11" >> /$CONF/fstab
 grep -vf  NEW_FS OLD_FS >> /$CONF/fstab
 rm -f NEW_FS OLD_FS
-#shatred memory set
-SHM_NEW=$(grep -i \/dev/shm  /etc/fstab)
-SHM_OLD=$(grep -i \/dev/shm  /mnt/etc/fstab)
-sed -i 's/$SHM_OLD/$SHM_NEW/' /etc/fstab
+#shatred memory set, for oracle only 
+SHM_NEW=$(grep -i \/dev/shm  /$CONF/fstab)
+SHM_OLD=$(grep -i \/dev/shm  /$OLDSLES/$CONF/fstab)
+sed -i 's/$SHM_OLD/$SHM_NEW/' /$CONF/fstab
 cat /$CONF/fstab
 
 read
