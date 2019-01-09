@@ -1,0 +1,11 @@
+#!/bin/bash
+
+systool -c fc_host -v |grep -E "port_state"|grep -v Online
+p=$(echo $?)
+
+if [ $p -eq "0" ]
+then
+  systool -c fc_host -v |grep -E "port_state"|grep -v Online
+else
+  echo "All port are connected"
+fi
