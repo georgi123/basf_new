@@ -15,7 +15,7 @@ mount /dev/$1/home /$OLDSLES/usr2/local/
 ######check fstab#######
 echo "FSTAB"
 cp /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
-grep -i xfs /$CONF/fstab |grep -v sles12 >> NEW_FS
+grep -i xfs /$CONF/fstab |grep -v $2 >> NEW_FS
 grep -i xfs /$OLDSLES/$CONF/fstab >> OLD_FS
 echo "#data and app from sles11" >> /$CONF/fstab
 grep -vf  NEW_FS OLD_FS >> /$CONF/fstab
@@ -128,7 +128,7 @@ echo 'basfad.basf.net' > /etc/defaultdomain
 domainname $( cat /etc/defaultdomain )
 
 ##set hostname
-hostnamectl set-hostname $2
+hostnamectl set-hostname $3
 
 ##set corect services boot with OS
 systemctl enable rpcbind && systemctl restart rpcbind
