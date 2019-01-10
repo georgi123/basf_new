@@ -150,4 +150,6 @@ systemctl enable autofs && systemctl restart autofs
 ######change machina id, this is need to rejoin to a suse-mgr01#####
 rm  -f /etc/machine-id
 dbus-uuidgen --ensure=/etc/machine-id
+####joint to basf AD$#####
 
+/root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $3
