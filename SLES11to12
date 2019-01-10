@@ -139,3 +139,7 @@ systemctl enable vasd && systemctl restart vasd
 systemctl enable vasypd && systemctl restart vasypd
 systemctl enable autofs && systemctl restart autofs
 ##check nfs mount points 
+######change machina id, this is need to rejoin to a suse-mgr01#####
+rm  -f /etc/machine-id
+dbus-uuidgen --ensure=/etc/machine-id
+
