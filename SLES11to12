@@ -38,6 +38,14 @@ cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
 #echo "#users from sles11" >> /$CONF/passwd #??
 #cat pass_dif >> /$CONF/passwd #??
 
+##modify shadow file
+echo "SHADOW"
+cp -fr /$CONF/shadow /$CONF/shadow$(date  +%Y%m%d)
+grep -v -f /$CONF/shadow /$OLDSLES/$CONF/shadow > shadow_dif
+cat shadow_dif
+#echo "#shadow from sles11" >> /$CONF/shadow #??
+#cat shadow_dif >> /$CONF/shadow #??
+
 ##modify group file
 echo "GROUP"
 cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
