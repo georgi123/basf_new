@@ -5,6 +5,7 @@ CONF=etc
 OLDSLES=mnt
 LOG=set_configuration.log
 COMMAND=systemctl
+$OPSPACKAGE=./opsware-agent-60.0.71639.1-linux-SLES-12-X86_64
 
 ##set mountpoint from old sles11 server
 mount /dev/$1/root /$OLDSLES/
@@ -153,3 +154,7 @@ dbus-uuidgen --ensure=/etc/machine-id
 ####joint to basf AD$#####
 
 /root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $3
+
+####Register server to HPSA####
+
+$OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
