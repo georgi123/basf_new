@@ -140,6 +140,27 @@ domainname $( cat /etc/defaultdomain )
 ##set hostname
 hostnamectl set-hostname $3
 
+##check nfs mount points 
+######change machina id, this is need to rejoin to a suse-mgr01#####
+rm  -f /etc/machine-id
+dbus-uuidgen --ensure=/etc/machine-id
+####configure vastool cleent####
+declare -f vas_client_conf
+
+vas_client_conf() {
+    for vas in vasclnt.rpm vasgp.rpm vasyp.rpm
+	 do 
+	 rpm -Uvh $vas
+	 done
+	} 
+	 
+vas_client_conf
+####joint to basf AD$#####
+
+/root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $3
+
+vastool status
+
 ##set corect services boot with OS
 systemctl enable rpcbind && systemctl restart rpcbind
 systemctl enable nscd && systemctl restart nscd
@@ -147,10 +168,7 @@ systemctl enable ypbind && systemctl restart ypbind
 systemctl enable vasd && systemctl restart vasd
 systemctl enable vasypd && systemctl restart vasypd
 systemctl enable autofs && systemctl restart autofs
-##check nfs mount points 
-######change machina id, this is need to rejoin to a suse-mgr01#####
-rm  -f /etc/machine-id
-dbus-uuidgen --ensure=/etc/machine-id
+
 ####joint to basf AD$#####
 
 /root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $3
