@@ -169,9 +169,6 @@ systemctl enable vasd && systemctl restart vasd
 systemctl enable vasypd && systemctl restart vasypd
 systemctl enable autofs && systemctl restart autofs
 
-####joint to basf AD$#####
-
-/root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $3
 
 ####Register server to HPSA####
 
