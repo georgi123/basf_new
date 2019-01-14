@@ -86,6 +86,8 @@ rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh
 rsync -avz  /$OLDSLES/$CONF/auto.* /$CONF/
 cp -fr  /$OLDSLES/$CONF/resolv.conf  /$CONF/resolv.conf
 cp -fr  /$OLDSLES/$CONF/nscd.conf /$CONF/nscd.conf
+cp -fr  /$OLDSLES/$CONF/hosts /$CONF/hosts
+
 
 ##set rpcbind user
 echo "rpc:x:495:65534:user for rpcbind:/var/lib/empty:/sbin/nologin" >> /$CONF/passwd
