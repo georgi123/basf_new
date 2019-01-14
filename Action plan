@@ -89,6 +89,14 @@ Just replace <SERVER> with the server name.
 /opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
 /opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
  
+ 
+ Мисля, че в този случай:
+а) Прехвърляне на потребители на OS SLES11, които са остарели / вече не съществуват в SLES12 (напр. polkituser)
+б) Прехвърляне на потребители на OS SLES11, които имат същото потребителско име като на SLES12, но са малко по-различни (напр. sshd, ntp)
+
+
+while read line; do if ! grep "$line" /etc/shadow_sles11.default &> /dev/null; then echo $line; fi; done < /etc/shadow
+while read line; do if ! grep "$line" /etc/shadow_sles11.default &> /dev/null; then echo $line; fi; done < /etc/shadow
 Register:
 copy /opt/apxpccp/recreate_pccp_pks.sh and /opt/apxpccc/recreate_pccc_pks.sh to the server
  
