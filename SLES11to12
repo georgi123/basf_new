@@ -151,6 +151,7 @@ vas_client_conf() {
     for vas in vasclnt.rpm vasgp.rpm vasyp.rpm
 	 do 
 	 rpm -Uvh $vas
+	 ln -s /opt/quest/bin/vastool /usr/sbin/
 	 done
 	} 
 	 
