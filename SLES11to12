@@ -105,7 +105,7 @@ rsync -avz  /$OLDSLES/opt/special/ /opt/special
 if [ -f /$OLDSLES/etc/oratab ]
  then
    cp -fr  /$OLDSLES/etc/oratab /etc/oratab
-   if  [ -f /$OLDSLES/etc/orainst.loc ]
+   if  [ -f /$OLDSLES/etc/oraInst.loc ]
   then
     cp -fr  /$OLDSLES/etc/oraInst.loc /etc/oraInst.loc
   else
