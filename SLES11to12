@@ -178,3 +178,9 @@ systemctl enable autofs && systemctl restart autofs
 ####Register server to HPSA####
 
 $OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
+
+#####apx set#####
+./recreate_pccc_pks.sh &&
+./recreate_pccp_pks.sh
+
+
