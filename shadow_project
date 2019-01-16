@@ -1,7 +1,8 @@
-diff shadow_sles11.default shadow > /tmp/difer_shadow && \
-sed -i '/^[0-9]/d' /tmp/difer_shadow && \
-sed -i '/^-/d' /tmp/difer_shadow && \
+diff shadow_sles11.default shadow > /tmp/difer_shadow 
+sed -i '/^[0-9]/d' /tmp/difer_shadow
+sed -i '/^-/d' /tmp/difer_shadow 
+sed -i "/^</d" /tmp/difer_shadow
 awk '{print $2}' /tmp/difer_shadow
 
 
-diff shadow_sles11.default shadow > /tmp/difer_shadow ;sed -i '/^[0-9]/d' /tmp/difer_shadow ; sed -i '/^-/d' /tmp/difer_shadow ;awk '{print $2}' /tmp/difer_shadow
+diff shadow_sles11.default shadow > /tmp/difer_shadow ;sed -i '/^[0-9]/d' /tmp/difer_shadow ; sed -i '/^-/d' /tmp/difer_shadow ;sed -i "/^</d" /tmp/difer_shadow; awk '{print $2}' /tmp/difer_shadow
