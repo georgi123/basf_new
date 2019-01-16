@@ -104,7 +104,7 @@ echo "root:sles11to12" |chpasswd
 #cp -fr  /$OLDSLES/$CONF/services /$CONF/services
 
 rsync -avz  /$OLDSLES/root/scripts/ /root/scripts/
-rsync -avz  /$OLDSLES/opt/special/ /opt/special
+rsync -avz  /$OLDSLES/opt/special /opt/special
 
 
 
