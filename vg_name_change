@@ -1,15 +1,13 @@
 #!/bin/bash
 
 help() {
-echo "$1 is a old vg name"
-echo "$2 is a new vg name"
+echo "\$1 is a old vg name"
+echo "\$2 is a new vg name"
 echo "values for old and new are mandatori"
 }
 if [ $1 == "--help" ]
  then 
   help()
-  elce
-   exit
  fi  
    
 vgrename $1 $2
