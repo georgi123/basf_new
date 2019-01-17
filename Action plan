@@ -16,28 +16,28 @@ delete HPSA agent
 
 3.Unjoined server from BASF domain.
 lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -u servername 
-c2gSj3+bFL
+
 for s in $(cat /usr2/local/sles11o12); do ./basfad_join2AD.sh -u $s;done
 group is infra-ITIS
 
 4.Stop server detach root vmdk from first iscs controller, attach root disk with sles12 vmdk on the iscso0:0.
 Attach sles11 vmdk on the last iscs controller and power on the server.
 
-5.After the server power on log in via console and execute  ./sles12_sap_ora_conf.sh sles11.
+5.After the server power on log in via console and execute  ./sles11to12.sh sles11.
 The script will mount root file system(sles11) in /mnt directory and after that action will replace important configuration files.
+Reckreate machine-id, register server to BASF AD, install HPSA agent and conect server to APX.
 
-6.Register server to suse-manger and join server to BASF domain.
-rm  -f /etc/machine-id
-dbus-uuidgen --ensure=/etc/machine-id
+6.Register server to suse-manager.
 ./register-to-SUSE-Manager.sh -r -l sles11to12
-lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -r servername
-$OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
-cd /tmp  
-wget http://repo-linux.wa.basf-it-services.com/noarch/DXC-Tools/opsware-agent-60.0.73283.4-linux-SLES-11-X86_64 
-chmod +x opsware* 
-./opsware* --opsw_gw_addr 10.92.96.41:3001,10.92.96.42:3001 --force_full_hw_reg --force_sw_reg
 
 7.SAP and Oracle colleagues will install new DB and application versions and check if application, databases running correct. 
+
+
+
+
+
+
+
 
 Scripts vg_name_change.sh, sles12_sap_ora_conf.sh, I test them on my lab but we can check if they work correct next week.
 
