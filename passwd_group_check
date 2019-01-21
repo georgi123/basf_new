@@ -2,7 +2,9 @@ echo "PASSWORD"
 cat passwd_sles12.test|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/new_passwd
 cat passwd|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/old_passwd
 grep -vf /tmp/new_group /tmp/old_passwd
-
+echo
+echo
+echo
 echo "GROUPS"
 cat group|tr '\:' "\t"|awk '{print $1 "\t" $3}' >  /tmp/old
 cat group_sles12|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/new
