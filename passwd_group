@@ -1,0 +1,3 @@
+cat group|tr '\:' "\t"|awk '{print $1}' >  /tmp/old
+cat group_sles12|tr '\:' "\t" |awk  '{print $1}' > /tmp/new
+grep -vf /tmp/old /tmp/new
