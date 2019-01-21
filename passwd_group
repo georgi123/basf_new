@@ -1,3 +1,8 @@
 cat group|tr '\:' "\t"|awk '{print $1}' >  /tmp/old
 cat group_sles12|tr '\:' "\t" |awk  '{print $1}' > /tmp/new
 grep -vf /tmp/old /tmp/new
+
+
+cat passwd_sles12.test|tr '\:' "\t" |awk  '{print $1}' > /tmp/new_passwd
+cat passwd|tr '\:' "\t" |awk  '{print $1}' > /tmp/old_passwd
+grep -vf /tmp/new_group /tmp/old_passwd
