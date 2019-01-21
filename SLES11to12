@@ -66,9 +66,9 @@ cat group_dif
 
 ####check what kind a server is######
 
-if [ -f /etc/products.d/SUSE_SLES_SAP.prod ]
+if [ -f /$CONF/products.d/SUSE_SLES_SAP.prod ]
  then 
-   rsync -avz /mnt/opt/omni/bin/* /opt/omni/bin
+   rsync -avz /$OLDSLES/opt/omni/bin/* /opt/omni/bin
  else 
    echo "Server is Oracle"
 fi  
