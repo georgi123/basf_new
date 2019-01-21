@@ -63,10 +63,15 @@ cat group_dif
 #echo "#groups from sles11" >> /$CONF/group #??
 #cat group_dif >> /$CONF/group #??
 
-##check sysctl.conf
-echo "SYSCTL"
-grep -v \# /$CONF/sysctl.conf >> /$CONF/sles12.sys
-grep -v \# /$OLDSLES/$CONF/sysctl.conf >> /$CONF/sles11.sys
+
+####check what kind a server is######
+
+if [ -f /etc/products.d/SUSE_SLES_SAP.prod ]
+ then 
+   rsync -avz /mnt/opt/omni/bin/* /opt/omni/bin
+ else 
+   echo "Server is Oracle"
+fi  
 
 
 
