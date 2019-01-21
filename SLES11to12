@@ -41,27 +41,21 @@ read
 
 ##modify passwd file
 echo "PASSWD"
-grep -v -f /$CONF/passwd /$OLDSLES/$CONF/passwd > pass_dif
-cat pass_dif
-cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
-#echo "#users from sles11" >> /$CONF/passwd #??
-#cat pass_dif >> /$CONF/passwd #??
+for users in messagebus ntp sshd polkituser
+ do 
+   sed -i "/$users/d" /etc/passwd
+ done  
+egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/passwd >> /etc/passwd
 
-##modify shadow file
-echo "SHADOW"
-cp -fr /$CONF/shadow /$CONF/shadow$(date  +%Y%m%d)
-grep -v -f /$CONF/shadow /$OLDSLES/$CONF/shadow > shadow_dif
-cat shadow_dif
-#echo "#shadow from sles11" >> /$CONF/shadow #??
-#cat shadow_dif >> /$CONF/shadow #??
 
 ##modify group file
 echo "GROUP"
 cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
-grep -v -f /$CONF/group /$OLDSLES/$CONF/group > group_dif
-cat group_dif
-#echo "#groups from sles11" >> /$CONF/group #??
-#cat group_dif >> /$CONF/group #??
+for users in messagebus ntp sshd polkituser
+ do 
+   sed -i "/$users/d" /etc/group
+ done  
+egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/group >> /etc/group
 
 
 ####check what kind a server is######
