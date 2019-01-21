@@ -2,13 +2,15 @@ echo "PASSWORD"
 cat passwd_sles12.test|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/new_passwd
 cat passwd|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/old_passwd
 grep -vf /tmp/new_group /tmp/old_passwd
+while read p; do egrep $p /etc/passwd ;done < $(grep -vf /tmp/new_passwd /tmp/old_passwd|awk '{print $1}')
 echo
 echo
 echo
 echo "GROUPS"
 cat group|tr '\:' "\t"|awk '{print $1 "\t" $3}' >  /tmp/old_group
 cat group_sles12|tr '\:' "\t" |awk  '{print $1 "\t" $3}' > /tmp/new_group
-grep -vf /tmp/old /tmp/new
+grep -vf /tmp/old_group /tmp/new_group
+while read p; do egrep $p /etc/group ;done < $(grep -vf /tmp/old /tmp/new|awk '{print $1}')
 
 
 
