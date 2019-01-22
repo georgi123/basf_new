@@ -12,6 +12,7 @@ diff shadow_sles11.default shadow > /tmp/difer_shadow ;sed -i '/^[0-9]/d' /tmp/d
 2. Sistem users from new system have to be save
 3. replase shadow with base old OS users and apply application specific usesers from new OS
 
-Sugestion:
+for filesystem in $(df -lhP | egrep 'sapComn|ZMV' | awk '{ print $NF }' | sort -r); do umount $filesystem; done
+
 
 
