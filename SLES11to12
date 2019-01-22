@@ -55,7 +55,9 @@ for users in messagebus ntp sshd polkituser
    sed -i "/$users/d" /etc/passwd
  done  
 egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/passwd >> /etc/passwd
-
+  #compare with default sles11 file#
+#while read line; do if ! grep "$line" /etc/passwd_sles11.default &> /dev/null; then echo $line; fi; done < /etc/passwd |tr '\:' "\t"|awk '{print $1}' > /tmp/sap_users
+#while read sap_users; do grep -i $sap_users /etc/passwd_sles12.test; done < /tmp/sap_users
 
 ##modify group file
 echo "GROUP"
@@ -65,6 +67,9 @@ for users in messagebus ntp sshd polkituser
    sed -i "/$users/d" /etc/group
  done  
 egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/group >> /etc/group
+ #compare with default sles11 file#
+#while read line; do if ! grep "$line" /etc/group_sles11.default &> /dev/null; then echo $line; fi; done < /etc/group |tr '\:' "\t"|awk '{print $1}' > /tmp/sap_group
+#while read sap_users; do grep -i $sap_group /etc/group_sles12.test; done < /tmp/sap_group
 
 
 ####check what kind a server is######
