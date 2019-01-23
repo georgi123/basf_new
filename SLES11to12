@@ -50,10 +50,10 @@ read
 
 ##modify passwd file
 echo "PASSWD"
-for users in messagebus ntp sshd polkituser
- do 
-   sed -i "/$users/d" /etc/passwd
- done  
+#for users in messagebus ntp sshd polkituser
+# do 
+#  sed -i "/$users/d" /etc/passwd
+#done  
 egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/passwd >> /etc/passwd
   #compare with default sles11 file#
 #while read line; do if ! grep "$line" /etc/passwd_sles11.default &> /dev/null; then echo $line; fi; done < /etc/passwd 
@@ -63,10 +63,10 @@ egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/passwd >> /etc/passwd
 ##modify group file
 echo "GROUP"
 cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
-for users in messagebus ntp sshd polkituser
- do 
-   sed -i "/$users/d" /etc/group
- done  
+#for users in messagebus ntp sshd polkituser
+# do 
+#   sed -i "/$users/d" /etc/group
+# done  
 egrep "messagebus|ntp|sshd|polkituser" /mnt/etc/group >> /etc/group
  #compare with default sles11 file#
 #while read line; do if ! grep "$line" /etc/group.sles11.default &> /dev/null; then echo $line; fi; done < /etc/group
