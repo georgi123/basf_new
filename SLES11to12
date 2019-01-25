@@ -98,10 +98,11 @@ echo "root:sles11to12" |chpasswd
 rsync -avz  /$OLDSLES/root/scripts/ /root/scripts/
 rsync -avz  /$OLDSLES/opt/special /opt/special
 
-#####apx setup#######
-rsync -avz /mnt/opt/apxpccc/ /opt/apxpccc
-rsync -avz /mnt/opt/apxpccp/ /opt/apxpccp
-rsync -avz /mnt/opt/apxpccs/ /opt/apxpccs
+#####copy apx important files#######
+
+rsync -avz /$OLDSLES/opt/apxpccc/ /opt/apxpccc
+rsync -avz /$OLDSLES/opt/apxpccp/ /opt/apxpccp
+rsync -avz /$OLDSLES/opt/apxpccs/ /opt/apxpccs
 
 
 
@@ -193,5 +194,5 @@ cp recreate_pccp_pks.sh /opt/apxpccp/
 
 /opt/apxpccc/recreate_pccc_pks.sh
 /opt/apxpccp/recreate_pccp_pks.sh
-/opt/apxpccp/recreate_pccs_pks.sh
+#/opt/apxpccp/recreate_pccs_pks.sh
 
