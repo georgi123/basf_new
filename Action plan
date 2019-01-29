@@ -1,21 +1,50 @@
-vg_name_change.sh >> rename vg from system to sles 11 
-sles12_sap_ora_conf.sh >> replace important configuration and check
+####vg_name_change.sh >> rename vg from system to sles 11 
+####sle11to12 >> replace important configuration, set network, hostname, join server to BASF AD, reregister server to APX and HPSA.
+
+Prerequsits:
+Before replace system VMDK's.
+This is very importamt for furder operation, because both server have the same system VG names ( system).
 
 1.Change system volume group from system to suse11  
 ./vg_name_change.sh system sles11
-
-
+2.Check if the name is successful rename.
+vgs
+PS:If VG namas are diferent this action is not required.
 2.Unregister server from suse-manager.
 From suse-mgr01 execute ./register-to-SUSE-Manager.sh -e -s servername
 ./register-to-SUSE-Manager.sh -e -l sles11to12
-delete server via suse-manager web interface
-delete HPSA agent
-/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force
-
-
-
 3.Unjoined server from BASF domain.
 lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -u servername 
+4.Unregister server form APX:
+/opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
+/opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
+5.Unregister server from HPSA.
+/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force
+
+ 
+After VMDK replasment:
+
+All scripts and binary files are putted in /root/scripts/sles_migration/
+1.Go to a direcrtory and axecute:
+
+./sle11to12 old_vg new_vg hostname
+
+2.Go to a suse-mgr01 in directory /infra/linux/SuSE-manager and join server 
+./register-to-SUSE-Manager.sh -r -s sles11to12
+
+Inform colleagues from BASF to proceed with further action.
+
+
+
+
+
+
+
+
+
+
+
+
 
 for s in $(cat /usr2/local/sles11o12); do ./basfad_join2AD.sh -u $s;done
 group is infra-ITIS
@@ -23,12 +52,10 @@ group is infra-ITIS
 4.Stop server detach root vmdk from first iscs controller, attach root disk with sles12 vmdk on the iscso0:0.
 Attach sles11 vmdk on the last iscs controller and power on the server.
 
-5.After the server power on log in via console and execute  ./sles11to12.sh sles11.
-The script will mount root file system(sles11) in /mnt directory and after that action will replace important configuration files.
-Reckreate machine-id, register server to BASF AD, install HPSA agent and conect server to APX.
+
 
 6.Register server to suse-manager.
-./register-to-SUSE-Manager.sh -r -l sles11to12
+./register-to-SUSE-Manager.sh -r -s sles11to12
 
 7.SAP and Oracle colleagues will install new DB and application versions and check if application, databases running correct. 
 
