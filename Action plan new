@@ -1,0 +1,38 @@
+  Prerequisite:
+	Before replace system VMDK's.
+	This is very important for furder operation, because both server have the same system VG names ( system).
+	
+
+	1.Change system volume group from system to suse11  
+	./vg_name_change.sh system sles11
+	2.Check if the name is successful rename.
+	vgs
+	PS: If VG names are different this action is not required.
+	2.Unregister server from suse-manager.
+	From suse-mgr01 execute ./register-to-SUSE-Manager.sh -e -s servername
+	./register-to-SUSE-Manager.sh -e -l sles11to12
+	3.Unjoined server from BASF domain.
+	lxinfra01:/home/unxtools/ADJOIN/ADJOIN_LOCAL/basfad_join2AD.sh -u servername 
+	4.Unregister server form APX:
+	/opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
+	/opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
+	5.Unregister server from HPSA.
+	/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force
+	
+
+	 
+	After VMDK replacement:
+	
+
+	All scripts and binary files are putted in /root/scripts/sles_migration/
+	1.Go to a directory and execute:
+	
+
+	./sle11to12 old_vg new_vg hostname
+	
+
+	2.Go to a suse-mgr01 in directory /infra/linux/SuSE-manager and join server 
+	./register-to-SUSE-Manager.sh -r -s sles11to12
+	
+
+	Inform colleagues from BASF to proceed with further action.
