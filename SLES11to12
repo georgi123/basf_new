@@ -196,3 +196,22 @@ cp recreate_pccp_pks.sh /opt/apxpccp/
 /opt/apxpccp/recreate_pccp_pks.sh
 #/opt/apxpccp/recreate_pccs_pks.sh
 
+######mount old vg when server boot#####
+
+declare -f oldosmount
+
+oldosmount() {systemctl enable rc-local
+
+echo "/root/scripts/sles_migration/boot_mount.sh system" >> /etc/rc.d/boot.local
+echo "/root/scripts/sles_migration/boot_mount.sh system" >> /etc/init.d/after.local
+}
+
+grep boot_mount /etc/rc.d/boot.local
+
+if [ $? -eq "0" ]
+ then
+  oldosmount
+ else
+  echo "Entry was already added"
+fi  
+  
