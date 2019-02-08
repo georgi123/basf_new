@@ -9,5 +9,5 @@ keyscp /home/uranus/routine/prod/SSL/apxpccC_lin64_create_pks.tar root@rdeluh000
 $file=apxpccp_lin64_create_pks.tar;
 use File::Copy qw(move);
 copy $file /opt/apxpccp;
-exec('tar -xvf $file');
-exec('./recreate_pccp_pks.sh');
+exec('tar -xvf /opt/apxpccp/$file');
+exec('/opt/apxpccp/./recreate_pccp_pks.sh');
