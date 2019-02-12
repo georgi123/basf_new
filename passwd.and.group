@@ -9,16 +9,17 @@ cp -fr /$CONF/group /$CONF/group$(date  +%Y-%m-%d)
 
 #####add apps users from sles11########
 if [ -d $DIR ]
- then 
-   echo "old app users" >> $PASSWD
-   $DIR/./getLinuxApplUsers.sh >> OLD_USER; cat OLD_USER >> $PASSWD; rm -f OLD_USER
-   
-   echo "old app groups" >> $GROUP
-   $DIR/./getLinuxApplGroups.sh >> OLD_GROUP; cat OLD_GROUP >> $GROUP; rm -f OLD_GROUP
+ then
+   echo "###old app users" >> $PASSWD &&
+   $DIR/./getLinuxApplUsers.sh > OLD_USER && cat OLD_USER >> $PASSWD && rm -f OLD_USER
 
-  else 
+   echo "###old app groups" >> $GROUP &&
+   $DIR/./getLinuxApplGroups.sh > OLD_GROUP && cat OLD_GROUP >> $GROUP && rm -f OLD_GROUP
+
+  else
     echo "CHEK WHY MOUNT IS NOT CONSIST"
-fi	
+fi
+	
 ##############################################################################################################################################################
 #############################################################################################################################
 ###########################################################################################################
