@@ -2,13 +2,20 @@ DIR="/apps/sapinst/users/patrick/misc/SLES12"
 PASSWD="/etc/passwd"
 GROUP="/etc/group"
 
+####make backup on passwd and group######
+cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y-%m-%d)
+cp -fr /$CONF/group /$CONF/group$(date  +%Y-%m-%d)
+
+#####add apps users from sles11########
 if [ -d $DIR ]
  then 
    echo "old app users" >> $PASSWD
-   $DIR/./getLinuxApplUsers.sh >>  $PASSWD
+   $DIR/./getLinuxApplUsers.sh >> OLD_USER; cat OLD_USER >> $PASSWD; rm -f OLD_USER
+   
    echo "old app groups" >> $GROUP
-   $DIR/./getLinuxApplGroups.sh >> $GROUP
- else 
+   $DIR/./getLinuxApplGroups.sh >> OLD_GROUP; cat OLD_GROUP >> $GROUP; rm -f OLD_GROUP
+
+  else 
     echo "CHEK WHY MOUNT IS NOT CONSIST"
 fi	
 ##############################################################################################################################################################
