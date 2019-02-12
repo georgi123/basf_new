@@ -1,3 +1,4 @@
+CONF="/etc"
 DIR="/apps/sapinst/users/patrick/misc/SLES12"
 PASSWD="/etc/passwd"
 GROUP="/etc/group"
