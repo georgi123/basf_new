@@ -11,4 +11,4 @@ system('dbus-uuidgen --ensure=/etc/machine-id');
 system('/opt/opsware/agent/bin/agent_uninstall.sh --no_deactivate --force');
 system('rm -r /opt/opsware');
 ##unjoin server from BASF AD##
-system('/root/scripts/sles_migration/basfad/./basfad_join2AD.sh -f $(hostname)');
+system('/root/scripts/sles_migration/basfad/./basfad_join2AD.sh -u $(hostname)');
