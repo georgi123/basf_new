@@ -2,6 +2,9 @@
 #####use the script when have to revert from sles12 to sles11#######
 
 ##unregister server from APX#####
+$file="/etc/machine-id";
+unlink $file;
+system('dbus-uuidgen --ensure=/etc/machine-id');
 system('/opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp');
 system('/opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp');
 ##unregister server from HPSA##
