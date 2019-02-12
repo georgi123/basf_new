@@ -1,3 +1,19 @@
+DIR="/apps/sapinst/users/patrick/misc/SLES12"
+PASSWD="/etc/passwd"
+GROUP="/etc/group"
+
+if [ -d $DIR ]
+ then 
+   echo "old app users" >> $PASSWD
+   $DIR/./getLinuxApplUsers.sh >>  $PASSWD
+   echo "old app groups" >> $GROUP
+   $DIR/./getLinuxApplGroups.sh >> $GROUP
+ else 
+    echo "CHEK WHY MOUNT IS NOT CONSIST"
+fi	
+##############################################################################################################################################################
+#############################################################################################################################
+###########################################################################################################
 ##modify passwd file
 echo "PASSWD"
 #for users in messagebus ntp sshd polkituser
