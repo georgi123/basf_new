@@ -22,8 +22,10 @@ if [ -f /boot/grub/menu.lst ]
     sed -i "s/$1/$2/" /boot/grub/menu.lst
         elif [ -f /boot/grub2/grub.cfg ]
         then
-          echo "Root FS is btrfs"
-fi
+          echo "OS version is SLES12"
+          cp    /boot/grub2/grub.cfg  /boot/grub2/grub.back
+          sed -i "s/$1/$2/" /boot/grub2/grub.cfg
+ fi
 ##unregister server from APX#####
 /opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
 /opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
