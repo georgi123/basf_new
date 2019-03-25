@@ -1,15 +1,9 @@
 #!/bin/bash
+#created by Georgi Dimitrov
 
-help() {
-echo "\$1 is a old vg name"
-echo "\$2 is a new vg name"
-echo "values for old and new are mandatori"
-}
-if [ $1 == "--help" ]
- then 
-  help()
- fi  
-   
+echo "$1 is a old vg name"
+echo "$2 is a new vg name"
+
 vgrename $1 $2
 
 cp /etc/fstab /etc/fstab.back
@@ -22,10 +16,13 @@ if [ -f /boot/grub/menu.lst ]
     sed -i "s/$1/$2/" /boot/grub/menu.lst
         elif [ -f /boot/grub2/grub.cfg ]
         then
-          echo "OS version is SLES12"
           cp    /boot/grub2/grub.cfg  /boot/grub2/grub.back
           sed -i "s/$1/$2/" /boot/grub2/grub.cfg
- fi
+
+          sed -i "s/$1/$2/" /etc/default/grub
+          dracut -f && grub2-mkconfig
+fi
+
 ##unregister server from APX#####
 /opt/apxpccp/pccprel exec,DCM/DCM_DEREG_$(hostname).scp
 /opt/apxpccc/pccCrel exec,DCM/DCM_DEREG_$(hostname).scp
