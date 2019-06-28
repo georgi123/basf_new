@@ -1,42 +1,35 @@
 #!/bin/bash
+###$1-old root VG name
+###$2-host name
 
 
 CONF=etc
 OLDSLES=mnt
 LOG=set_configuration.log
 COMMAND=systemctl
-
+OPSPACKAGE=./opsware-agent-60.0.71639.1-linux-SLES-12-X86_64
+HOSTNAME=$( cat /mnt/etc/HOSTNAME|awk -F "." '{print $1}' )
 ##set mountpoint from old sles11 server
 mount /dev/$1/root /$OLDSLES/
 mount /dev/$1/opt /$OLDSLES/opt/
 mount /dev/$1/tmp /$OLDSLES/tmp/
 mount /dev/$1/home /$OLDSLES/usr2/local/
 
-##check fstab
-echo "FSTAB"
-grep -v -f /$CONF/fstab /$OLDSLES/$CONF/fstab > fstab_dif
-cat fstab_dif 
+######check fstab#######
+###df -htxfs |grep -v system|sort -n -k6###can use that to check if ther are differences##
+#echo "FSTAB"
+cp /$CONF/fstab /$CONF/fstab.back
 
-##modify passwd file
-echo "PASSWD"
-grep -v -f /$CONF/passwd /$OLDSLES/$CONF/passwd > pass_dif
-cat pass_dif
-cp -fr /$CONF/passwd /$CONF/passwd$(date  +%Y%m%d)
-echo "#users from sles11" >> /$CONF/passwd
-cat pass_dif >> /$CONF/passwd
 
-##modify group file
-echo "GROUP"
-cp -fr /$CONF/group /$CONF/group$(date  +%Y%m%d)
-grep -v -f /$CONF/group /$OLDSLES/$CONF/group > group_dif
-cat group_dif
-echo "#groups from sles11" >> /$CONF/group
-cat group_dif >> /$CONF/group
 
-##check sysctl.conf
-echo "SYSCTL"
-grep -v \# /$CONF/sysctl.conf >> /$CONF/sles12.sys
-grep -v \# /$OLDSLES/$CONF/sysctl.conf >> /$CONF/sles11.sys
+####check what kind a server is######
+
+if [ -f /$CONF/products.d/SUSE_SLES_SAP.prod ]
+ then
+   rsync -avz /$OLDSLES/opt/omni/bin/* /opt/omni/bin
+ else
+   echo "Server is Oracle"
+fi
 
 
 
@@ -50,6 +43,11 @@ sed -i "s/\/$OLDSLES//" linklist
 cat linklist
 while read p; do ln -s $p;done < linklist
 find / -maxdepth 1 -xdev -type l -exec ls -l {} \;
+####for non sap oracle servers only#####
+ rm -rf /special/
+ln -s /opt/special/ /special
+ls /special
+
 ##fstab sincronisation
 cp -fr  /$OLDSLES/$CONF/fstab  /$CONF/fstab$(date  +%Y%m%d)
 diff /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
@@ -57,46 +55,70 @@ diff /$CONF/fstab /$CONF/fstab$(date  +%Y%m%d)
 
 
 #transfer inportant files and configuration
-rsync -avz  /$OLDSLES/usr/local/bin/  /usr/local/bin/
-rsync -avz  /$OLDSLES/$CONF/ssh/ /$CONF/ssh/
-rsync -avz  /$OLDSLES/$CONF/BASFfirewall.d/ /$CONF/BASFfirewall.d/
-rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh/
+rsync -avz  /$OLDSLES/usr/local/bin/  /usr/local/bin
+rsync -avz  /$OLDSLES/$CONF/ssh/ /$CONF/ssh
+rsync -avz  /$OLDSLES/$CONF/BASFfirewall.d/ /$CONF/BASFfirewall.d
+rsync -avz  /$OLDSLES/root/.ssh/ /root/.ssh
 rsync -avz  /$OLDSLES/$CONF/auto.* /$CONF/
 cp -fr  /$OLDSLES/$CONF/resolv.conf  /$CONF/resolv.conf
 cp -fr  /$OLDSLES/$CONF/nscd.conf /$CONF/nscd.conf
+cp -fr  /$OLDSLES/$CONF/hosts /$CONF/hosts
+
 
 ##set rpcbind user
-echo "rpc:x:495:65534:user for rpcbind:/var/lib/empty:/sbin/nologin" >> /$CONF/passwd
+egrep rpc /etc/passwd
+
+if [ $? -eq "1" ]
+then
+ echo "rpc:x:495:65534:user for rpcbind:/var/lib/empty:/sbin/nologin" >> /$CONF/passwd
+ else
+  echo "User persist"
+fi
+
 echo "root:sles11to12" |chpasswd
 
 #cp -fr  /$OLDSLES/$CONF/services /$CONF/services
 
-rsync -avz  /$OLDSLES/root/scripts/ /root/scripts/
-rsync -avz  /$OLDSLES/opt/special/ /opt/special/
+rsync -avz  /$OLDSLES/root/scripts/ /root/scripts
+rsync -avz  /$OLDSLES/opt/special/ /opt/special
+
+#####copy apx important files#######
+
+rsync -avz /$OLDSLES/opt/apxpccc/ /opt/apxpccc
+rsync -avz /$OLDSLES/opt/apxpccp/ /opt/apxpccp
+rsync -avz /$OLDSLES/opt/apxpccs/ /opt/apxpccs
 
 
 
-#check if oracles DB is installed and running
+
+
+
+##check if oracles DB is installed and running
 
 if [ -f /$OLDSLES/etc/oratab ]
  then
-   cp -fr  /$OLDSLES/etc/oratab /etc/oratab
-   if  [ -f /$OLDSLES/etc/orainst.loc ]
+   cp -pfr  /$OLDSLES/etc/oratab /etc/oratab
+ fi
+   if  [ -f /$OLDSLES/etc/oraInst.loc ]
   then
-    cp -fr  /$OLDSLES/etc/orainst.loc /etc/orainst.loc
-  else
-    echo "there is not orainst.loc"
-  fi
- else
-   echo "There is not oracle DB installed"
-fi
+    cp -pfr  /$OLDSLES/etc/oraInst.loc /etc/oraInst.loc
+ fi
 ##only for HANA
 if [ -d /mnt/var/lib/hdb/ ]
  then
    rsync -av /$OLDSLES/var/lib/hdb/ /var/lib/hdb
- else 
+ else
    echo "there is not hana running"
-fi  
+fi
+####oracle_agent check#######
+ egrep 'oracle_agent' /mnt/etc/fstab
+
+if [ $? -eq '1' ]
+ then
+  rsync -avz /mnt/opt/oracle_agent/* /opt/oracle_agent
+ else
+  echo " oracle_agent is a separate volume"
+ fi
 
 ##setup network
 for p in {0..1}
@@ -116,11 +138,96 @@ echo 'basfad.basf.net' > /etc/defaultdomain
 domainname $( cat /etc/defaultdomain )
 
 ##set hostname
-hostnamectl set-hostname $2
-#set corect services boot with OS
+hostnamectl set-hostname $HOSTNAME
+
+##check nfs mount points
+######change machina id, this is need to rejoin to a suse-mgr01#####
+
+rm -rf /etc/machine-id
+rm -rf /var/lib/dbus/machine-id
+dbus-uuidgen --ensure=/etc/machine-id
+cp /etc/machine-id /var/lib/dbus/machine-id
+
+####configure vastool cleent####
+declare -f vas_client_conf
+
+vas_client_conf() {
+    for vas in vasclnt.rpm vasgp.rpm vasyp.rpm
+         do
+         rpm -Uvh $vas
+         ln -s /opt/quest/bin/vastool /usr/sbin/
+         done
+        }
+
+vas_client_conf
+####joint to basf AD$#####
+
+
+
+join() {
+ /root/scripts/migration/basfad/./basfad_join2AD.sh -f $HOSTNAME
+
+ vastool status
+}
+zone=$( cat /mnt/etc/HOSTNAME|awk -F "." '{print $2}' )
+
+  if [ $zone != "dmz" ]
+
+    then
+     join()
+  fi
+read
+
+##set corect services boot with OS
 systemctl enable rpcbind && systemctl restart rpcbind
 systemctl enable nscd && systemctl restart nscd
 systemctl enable ypbind && systemctl restart ypbind
 systemctl enable vasd && systemctl restart vasd
 systemctl enable vasypd && systemctl restart vasypd
 systemctl enable autofs && systemctl restart autofs
+
+
+####Register server to HPSA####
+
+$OPSPACKAGE --loglevel info --opsw_gw_addr_list 10.92.96.41:3001 -f --force_new_device
+
+#####apx set#####
+#cp /root/scripts/migration/apxpccp_lin64_create_pks.tar  /opt/apxpccp/
+#cd  /opt/apxpccp/
+#tar -xvf  /opt/apxpccp/apxpccp_lin64_create_pks_after_move.tar
+
+#cp recreate_pccc_pks.sh /opt/apxpccc/
+#cp recreate_pccp_pks.sh /opt/apxpccp/
+
+#/opt/apxpccc/recreate_pccc_pks.sh
+#/opt/apxpccp/recreate_pccp_pks.sh
+#/opt/apxpccp/recreate_pccp_apxcmd_pks.sh
+#/opt/apxpccp/recreate_pccp_pks_after_move.sh
+#/opt/apxpccp/apxcntl restart
+
+#####ora agent sync check
+s=$(egrep 'oracle_agent' /etc/fstab)
+if [ $s -eq "0" ]
+ then
+  echo "there is separate LV for Oracle_agent"
+ else
+  rsync -avz /mnt/opt/oracle_agent/* /opt/oracle_agent/
+fi
+
+#sinc passwd,group and shadow files
+#echo "###" >> /etc/passwd
+#echo "###" >> /etc/group
+#cp /etc/passwd /etc/passwd.back
+#cp /etc/group /etc/group.back
+#/root/scripts/migration/getLinuxApplUsers.sh >> /etc/passwd
+#/root/scripts/migration/getLinuxApplGroups.sh >> /etc/group
+
+#cp /etc/shadow /etc/shadow.back
+
+#pwconv
+####add autofs cocp -p /usr/lib/systemd/system/autofs.service /etc/systemd/system/autofs.service
+
+#cp -p /usr/lib/systemd/system/autofs.service /etc/systemd/system/autofs.service
+#sed -i '/EnvironmentFile/a ExecStartPre=/bin/sleep 60' /etc/systemd/system/autofs.service
+#systemctl daemon-reload
+#systemctl enable autofs
