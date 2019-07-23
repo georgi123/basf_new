@@ -1,0 +1,72 @@
+#!/bin/bash
+
+
+SAP_LIST=/infra/linux/SUSE-Manager/sap_list
+
+ORA_LIST=/infra/linux/SUSE-Manager/ora_list
+
+ora_info() {
+
+printf '\e[1;34m%-6s\e[m\n' "CHECK ROOT VG NAME"
+echo
+for ora in $(cat $ORA_LIST); do ssh root@$ora "hostname; lvs |egrep 'root|rootvol'";done
+printf '\e[1;34m%-6s\e[m\n' "CHECK oracle_agen SIMLINK"
+echo
+for ora in $(cat $ORA_LIST); do ssh root@$ora "hostname; find / -maxdepth 1 -xdev -type l -exec ls -l {} \;|grep oracle_agent;";done
+printf '\e[1;34m%-6s\e[m\n' "CHECK IF oracle_agent IS A SEPARATE VOLUME"
+echo
+for ora in $(cat $ORA_LIST); do ssh root@$ora "hostname; df -h |grep oracle_agent";done
+
+printf '\e[1;34m%-6s\e[m\n' "CHECK NETWORK ADAPTERS"
+echo
+for ora in $(cat $ORA_LIST); do ssh root@$ora "hostname; ip a|egrep '^[0-9]'";done
+
+printf '\e[1;34m%-6s\e[m\n' "Directories that have to be sincronized."
+echo
+for ora in $(cat $ORA_LIST); do ssh root@$ora "hostname; ls /usr2/local";done
+
+ }
+
+
+sap_info() {
+
+printf '\e[1;34m%-6s\e[m\n' "CHECK ROOT VG NAME"
+echo
+for ora in $(cat $SAP_LIST); do ssh root@$ora "hostname; lvs |egrep 'root|rootvol'";done
+printf '\e[1;34m%-6s\e[m\n' "CHECK oracle_agen SIMLINK"
+echo
+for ora in $(cat $SAP_LIST); do ssh root@$ora "hostname; find / -maxdepth 1 -xdev -type l -exec ls -l {} \;|grep oracle_agent;";done
+printf '\e[1;34m%-6s\e[m\n' "CHECK IF oracle_agent IS A SEPARATE VOLUME"
+echo
+for ora in $(cat $SAP_LIST); do ssh root@$ora "hostname; df -h |grep oracle_agent";done
+
+printf '\e[1;34m%-6s\e[m\n' "CHECK NETWORK ADAPTERS"
+echo
+for ora in $(cat $SAP_LIST); do ssh root@$ora "hostname; ip a|egrep '^[0-9]'";done
+
+printf '\e[1;34m%-6s\e[m\n' "Directories that have to be sincronized."
+echo
+for ora in $(cat $SAP_LIST); do ssh root@$ora "hostname; ls /usr2/local";done
+
+ }
+
+
+
+case $1 in
+
+  -h|--help)
+
+    echo "use -h or --help for see options"
+    echo "use -s to sap server specifics"
+    echo "use -o to ora servee specifics"
+ ;;
+   -s|--sap)
+    sap_info
+ ;;
+   -o|--ora)
+   ora_info
+ ;;
+
+  *)
+ ;;
+esac
